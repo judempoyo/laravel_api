@@ -81,7 +81,7 @@ class SocialAuthController extends Controller
 
         $user = $this->findOrCreateUser($socialiteUser, $provider);
 
-        $token = $user->createToken('SocialAuthToken', ['api'])->accessToken;
+        $token = $user->createToken('SocialAuthToken')->accessToken;
 
         return response()->json([
             'access_token' => $token,

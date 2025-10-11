@@ -1,14 +1,14 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "API Documentation",
-        "description": "Documentation de l’API avec Swagger / OpenAPI",
+        "title": "API V1 d'Authentification (Passport/Socialite)",
+        "description": "Documentation de l'API d'authentification et de gestion des utilisateurs.",
         "version": "1.0.0"
     },
     "servers": [
         {
-            "url": "http://127.0.0.1:8000/api/v1/",
-            "description": "Serveur principal"
+            "url": "http://127.0.0.1:8000/",
+            "description": "Serveur API V1"
         }
     ],
     "paths": {
@@ -17,9 +17,11 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Register a new user",
+                "summary": "Enregistre un nouvel utilisateur",
+                "description": "Crée un nouvel utilisateur et lui émet un jeton (token) d'accès Passport.",
                 "operationId": "7ca6fc7989202054d29707fef91a2d4a",
                 "requestBody": {
+                    "description": "Données d'enregistrement de l'utilisateur",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -32,19 +34,25 @@
                                 ],
                                 "properties": {
                                     "name": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Jean Dupont"
                                     },
                                     "email": {
                                         "type": "string",
-                                        "format": "email"
+                                        "format": "email",
+                                        "example": "jean.dupont@example.com"
                                     },
                                     "password": {
                                         "type": "string",
-                                        "format": "password"
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "secret123"
                                     },
                                     "password_confirmation": {
                                         "type": "string",
-                                        "format": "password"
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "secret123"
                                     }
                                 },
                                 "type": "object"
@@ -54,10 +62,24 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "User registered successfully"
+                        "description": "Utilisateur enregistré et jeton d'accès émis.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthTokenResponse"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Erreur de validation des données fournies.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -67,9 +89,11 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Log in a user and get a token",
+                "summary": "Connecte un utilisateur",
+                "description": "Authentifie un utilisateur avec son email et mot de passe, puis émet un jeton (token) d'accès Passport.",
                 "operationId": "9d0bb5c770cbec19b0b9566606ef4adb",
                 "requestBody": {
+                    "description": "Identifiants de connexion",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -81,11 +105,13 @@
                                 "properties": {
                                     "email": {
                                         "type": "string",
-                                        "format": "email"
+                                        "format": "email",
+                                        "example": "jean.dupont@example.com"
                                     },
                                     "password": {
                                         "type": "string",
-                                        "format": "password"
+                                        "format": "password",
+                                        "example": "secret123"
                                     }
                                 },
                                 "type": "object"
@@ -95,10 +121,24 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Login successful"
+                        "description": "Connexion réussie. Jeton d'accès émis.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthTokenResponse"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Invalid credentials"
+                        "description": "Identifiants invalides.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -108,25 +148,22 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "get the authenticated user",
+                "summary": "Récupère l'utilisateur authentifié",
+                "description": "Nécessite un jeton Passport valide dans l'en-tête Authorization.",
                 "operationId": "a4cddb112551ac7618446c14d9526d9c",
                 "responses": {
                     "200": {
-                        "description": "user"
-                    }
-                }
-            }
-        },
-        "/api/v1/auth/logout": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Logout the authenticated user",
-                "operationId": "3a27a9e02ceb521eb3f98c8d2394aef9",
-                "responses": {
-                    "200": {
-                        "description": "Successfully logged out"
+                        "description": "Informations de l'utilisateur authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non autorisé (Jeton manquant ou invalide)"
                     }
                 },
                 "security": [
@@ -135,168 +172,191 @@
                     }
                 ]
             }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Déconnecte l'utilisateur",
+                "description": "Révoque le jeton d'accès (token) actuel de l'utilisateur, forçant la déconnexion.",
+                "operationId": "3a27a9e02ceb521eb3f98c8d2394aef9",
+                "responses": {
+                    "200": {
+                        "description": "Déconnexion réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non autorisé (Jeton manquant ou invalide)"
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/socialite/{provider}": {
+            "get": {
+                "tags": [
+                    "Auth Socialite"
+                ],
+                "summary": "Redirection vers le fournisseur social",
+                "description": "Lance le processus d'authentification en redirigeant l'utilisateur vers la page d'autorisation du fournisseur (Google, GitHub, etc.).",
+                "operationId": "f6240f81b2df2e9cef17bbb8ec1dd97b",
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "description": "Nom du fournisseur social (ex: google, github)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirection vers le fournisseur OAuth."
+                    },
+                    "400": {
+                        "description": "Fournisseur non supporté ou erreur de configuration."
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/socialite/{provider}/callback": {
+            "get": {
+                "tags": [
+                    "Auth Socialite"
+                ],
+                "summary": "Gestion du callback du fournisseur social",
+                "description": "Point de terminaison appelé par le fournisseur OAuth après l'autorisation de l'utilisateur. Crée/met à jour l'utilisateur et émet un jeton (token) Passport.",
+                "operationId": "b2da03bf7d17f7988d262b27c16b2125",
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "description": "Nom du fournisseur social (ex: google, github)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Authentification sociale réussie. Jeton d'accès émis.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthTokenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Échec de la récupération des données utilisateur ou annulation par l'utilisateur."
+                    }
+                }
+            }
         }
     },
     "components": {
         "schemas": {
-            "PatchContentFieldRequest": {
-                "required": [
-                    "path"
-                ],
+            "AuthTokenResponse": {
+                "title": "Auth Token Response",
+                "description": "Réponse standard après connexion ou enregistrement",
                 "properties": {
-                    "path": {
-                        "type": "string",
-                        "example": "title"
+                    "token": {
+                        "description": "Jeton d'accès (Access Token) Passport",
+                        "type": "string"
                     },
-                    "value": {
+                    "token_type": {
                         "type": "string",
-                        "example": "Updated value",
-                        "nullable": true
+                        "example": "Bearer"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/User"
                     }
                 },
                 "type": "object"
             },
-            "StoreContentRequest": {
-                "required": [
-                    "key",
-                    "data"
-                ],
+            "User": {
+                "title": "User Model",
+                "description": "Schéma de base de l'utilisateur",
                 "properties": {
-                    "key": {
-                        "type": "string",
-                        "maxLength": 191,
-                        "example": "homepage.title"
+                    "id": {
+                        "type": "integer",
+                        "example": 1
                     },
-                    "data": {
-                        "type": "object",
-                        "example": {
-                            "title": "Welcome",
-                            "subtitle": "Hello world"
-                        }
-                    },
-                    "type": {
-                        "type": "string",
-                        "enum": [
-                            "block",
-                            "section",
-                            "free"
-                        ],
-                        "example": "block",
-                        "nullable": true
-                    },
-                    "locale": {
-                        "type": "string",
-                        "maxLength": 10,
-                        "example": "en",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "StoreProjectRequest": {
-                "required": [
-                    "name"
-                ],
-                "properties": {
                     "name": {
                         "type": "string",
-                        "maxLength": 255,
-                        "example": "My Project"
+                        "example": "Jean Dupont"
                     },
-                    "slug": {
+                    "email": {
                         "type": "string",
-                        "example": "my-project",
-                        "nullable": true
+                        "format": "email",
+                        "example": "jean.dupont@example.com"
                     },
-                    "description": {
+                    "created_at": {
                         "type": "string",
-                        "example": "Optional project description.",
-                        "nullable": true
-                    },
-                    "visibility": {
-                        "type": "string",
-                        "enum": [
-                            "private",
-                            "public"
-                        ],
-                        "example": "private",
-                        "nullable": true
-                    },
-                    "settings": {
-                        "type": "object",
-                        "example": {
-                            "color": "blue"
-                        },
-                        "nullable": true
+                        "format": "date-time"
                     }
                 },
                 "type": "object"
             },
-            "UpdateContentRequest": {
-                "required": [
-                    "data"
-                ],
+            "ValidationErrorResponse": {
+                "title": "Validation Error Response",
+                "description": "Réponse standard pour les erreurs de validation (code 422)",
                 "properties": {
-                    "data": {
-                        "type": "object",
-                        "example": {
-                            "title": "Updated title"
-                        }
-                    },
-                    "type": {
+                    "message": {
                         "type": "string",
-                        "enum": [
-                            "block",
-                            "section",
-                            "free"
-                        ],
-                        "example": "section",
-                        "nullable": true
+                        "example": "The given data was invalid."
                     },
-                    "locale": {
-                        "type": "string",
-                        "maxLength": 10,
-                        "example": "fr",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "UpdateProjectRequest": {
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "maxLength": 255,
-                        "example": "Updated Project"
-                    },
-                    "slug": {
-                        "type": "string",
-                        "example": "updated-project",
-                        "nullable": true
-                    },
-                    "description": {
-                        "type": "string",
-                        "example": "New description.",
-                        "nullable": true
-                    },
-                    "visibility": {
-                        "type": "string",
-                        "enum": [
-                            "private",
-                            "public"
-                        ],
-                        "example": "public",
-                        "nullable": true
-                    },
-                    "settings": {
-                        "type": "object",
-                        "example": {
-                            "color": "green"
+                    "errors": {
+                        "description": "Détails des erreurs de validation par champ",
+                        "properties": {
+                            "email": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "example": "The email has already been taken."
+                                }
+                            },
+                            "password": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "example": "The password must be at least 8 characters."
+                                }
+                            }
                         },
-                        "nullable": true
+                        "type": "object"
                     }
                 },
                 "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "passport": {
+                "type": "http",
+                "description": "Entrez votre jeton (token) Passport dans l'en-tête 'Authorization: Bearer [token]'",
+                "bearerFormat": "Passport Token",
+                "scheme": "bearer"
             }
         }
     },
@@ -304,6 +364,10 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Auth Socialite",
+            "description": "Auth Socialite"
         }
     ]
 }

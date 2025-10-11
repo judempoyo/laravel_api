@@ -10,23 +10,33 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-     /**
+    /**
      * @OA\Post(
-     *     path="/api/v1/auth/register",
-     *     tags={"Auth"},
-     *     summary="Register a new user",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name","email","password","password_confirmation"},
-     *             @OA\Property(property="name", type="string"),
-     *             @OA\Property(property="email", type="string", format="email"),
-     *             @OA\Property(property="password", type="string", format="password"),
-     *             @OA\Property(property="password_confirmation", type="string", format="password")
-     *         )
-     *     ),
-     *     @OA\Response(response=201, description="User registered successfully"),
-     *     @OA\Response(response=422, description="Validation error")
+     * path="/api/v1/auth/register",
+     * tags={"Auth"},
+     * summary="Enregistre un nouvel utilisateur",
+     * description="Crée un nouvel utilisateur et lui émet un jeton (token) d'accès Passport.",
+     * @OA\RequestBody(
+     * required=true,
+     * description="Données d'enregistrement de l'utilisateur",
+     * @OA\JsonContent(
+     * required={"name","email","password","password_confirmation"},
+     * @OA\Property(property="name", type="string", example="Jean Dupont"),
+     * @OA\Property(property="email", type="string", format="email", example="jean.dupont@example.com"),
+     * @OA\Property(property="password", type="string", format="password", minLength=8, example="secret123"),
+     * @OA\Property(property="password_confirmation", type="string", format="password", minLength=8, example="secret123")
+     * )
+     * ),
+     * @OA\Response(
+     * response=201,
+     * description="Utilisateur enregistré et jeton d'accès émis.",
+     * @OA\JsonContent(ref="#/components/schemas/AuthTokenResponse")
+     * ),
+     * @OA\Response(
+     * response=422,
+     * description="Erreur de validation des données fournies.",
+     * @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
+     * )
      * )
      */
     public function register(Request $request)
@@ -54,19 +64,29 @@ class AuthController extends Controller
 
      /**
      * @OA\Post(
-     *     path="/api/v1/auth/login",
-     *     tags={"Auth"},
-     *     summary="Log in a user and get a token",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"email","password"},
-     *             @OA\Property(property="email", type="string", format="email"),
-     *             @OA\Property(property="password", type="string", format="password")
-     *         )
-     *     ),
-     *     @OA\Response(response=200, description="Login successful"),
-     *     @OA\Response(response=422, description="Invalid credentials")
+     * path="/api/v1/auth/login",
+     * tags={"Auth"},
+     * summary="Connecte un utilisateur",
+     * description="Authentifie un utilisateur avec son email et mot de passe, puis émet un jeton (token) d'accès Passport.",
+     * @OA\RequestBody(
+     * required=true,
+     * description="Identifiants de connexion",
+     * @OA\JsonContent(
+     * required={"email","password"},
+     * @OA\Property(property="email", type="string", format="email", example="jean.dupont@example.com"),
+     * @OA\Property(property="password", type="string", format="password", example="secret123")
+     * )
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Connexion réussie. Jeton d'accès émis.",
+     * @OA\JsonContent(ref="#/components/schemas/AuthTokenResponse")
+     * ),
+     * @OA\Response(
+     * response=422,
+     * description="Identifiants invalides.",
+     * @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
+     * )
      * )
      */
     public function login(Request $request)
@@ -92,12 +112,22 @@ class AuthController extends Controller
             'user' => $user,
         ], 200);
     }
- /**
+/**
      * @OA\Get(
-     *     path="/api/v1/auth/user",
-     *     tags={"Auth"},
-     *     summary="get the authenticated user",
-     *     @OA\Response(response=200, description="user")
+     * path="/api/v1/auth/user",
+     * tags={"Auth"},
+     * summary="Récupère l'utilisateur authentifié",
+     * description="Nécessite un jeton Passport valide dans l'en-tête Authorization.",
+     * security={{"passport":{}}}, 
+     * @OA\Response(
+     * response=200,
+     * description="Informations de l'utilisateur authentifié",
+     * @OA\JsonContent(ref="#/components/schemas/User")
+     * ),
+     * @OA\Response(
+     * response=401,
+     * description="Non autorisé (Jeton manquant ou invalide)"
+     * )
      * )
      */
        public function user(Request $request)
@@ -105,13 +135,24 @@ class AuthController extends Controller
         return response()->json($request->user());
     }
 
-  /**
+/**
      * @OA\Post(
-     *     path="/api/v1/auth/logout",
-     *     tags={"Auth"},
-     *     summary="Logout the authenticated user",
-     *     security={{"passport":{}}},
-     *     @OA\Response(response=200, description="Successfully logged out")
+     * path="/api/v1/auth/logout",
+     * tags={"Auth"},
+     * summary="Déconnecte l'utilisateur",
+     * description="Révoque le jeton d'accès (token) actuel de l'utilisateur, forçant la déconnexion.",
+     * security={{"passport":{}}},
+     * @OA\Response(
+     * response=200, 
+     * description="Déconnexion réussie",
+     * @OA\JsonContent(
+     * @OA\Property(property="message", type="string", example="Logged out successfully")
+     * )
+     * ),
+     * @OA\Response(
+     * response=401,
+     * description="Non autorisé (Jeton manquant ou invalide)"
+     * )
      * )
      */
     public function logout(Request $request)

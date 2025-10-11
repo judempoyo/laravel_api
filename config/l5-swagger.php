@@ -72,9 +72,7 @@ return [
                     \Illuminate\View\Middleware\ShareErrorsFromSession::class,
                     \Illuminate\Routing\Middleware\SubstituteBindings::class,
                     \Laravel\Passport\Http\Middleware\CreateFreshApiToken::class,
-
-                    
-                    'auth',
+                    //'auth:api',
                 ],
                 'asset' => [],
                 'docs' => [],
@@ -322,7 +320,7 @@ return [
          * Constants which can be used in annotations
          */
         'constants' => [
-            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'http://127.0.0.1:8000/api/v1/'),
+            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'http://127.0.0.1:8000/'),
         ],
     ],
 ];

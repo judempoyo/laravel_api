@@ -17,9 +17,11 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Register a new user",
+                "summary": "Enregistre un nouvel utilisateur",
+                "description": "Crée un nouvel utilisateur et lui émet un jeton (token) d'accès Passport.",
                 "operationId": "7ca6fc7989202054d29707fef91a2d4a",
                 "requestBody": {
+                    "description": "Données d'enregistrement de l'utilisateur",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -32,19 +34,25 @@
                                 ],
                                 "properties": {
                                     "name": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Jean Dupont"
                                     },
                                     "email": {
                                         "type": "string",
-                                        "format": "email"
+                                        "format": "email",
+                                        "example": "jean.dupont@example.com"
                                     },
                                     "password": {
                                         "type": "string",
-                                        "format": "password"
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "secret123"
                                     },
                                     "password_confirmation": {
                                         "type": "string",
-                                        "format": "password"
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "secret123"
                                     }
                                 },
                                 "type": "object"
@@ -54,10 +62,24 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "User registered successfully"
+                        "description": "Utilisateur enregistré et jeton d'accès émis.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthTokenResponse"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Erreur de validation des données fournies.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -67,9 +89,11 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Log in a user and get a token",
+                "summary": "Connecte un utilisateur",
+                "description": "Authentifie un utilisateur avec son email et mot de passe, puis émet un jeton (token) d'accès Passport.",
                 "operationId": "9d0bb5c770cbec19b0b9566606ef4adb",
                 "requestBody": {
+                    "description": "Identifiants de connexion",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -81,11 +105,13 @@
                                 "properties": {
                                     "email": {
                                         "type": "string",
-                                        "format": "email"
+                                        "format": "email",
+                                        "example": "jean.dupont@example.com"
                                     },
                                     "password": {
                                         "type": "string",
-                                        "format": "password"
+                                        "format": "password",
+                                        "example": "secret123"
                                     }
                                 },
                                 "type": "object"
@@ -95,10 +121,24 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Login successful"
+                        "description": "Connexion réussie. Jeton d'accès émis.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthTokenResponse"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Invalid credentials"
+                        "description": "Identifiants invalides.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -108,25 +148,22 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "get the authenticated user",
+                "summary": "Récupère l'utilisateur authentifié",
+                "description": "Nécessite un jeton Passport valide dans l'en-tête Authorization.",
                 "operationId": "a4cddb112551ac7618446c14d9526d9c",
                 "responses": {
                     "200": {
-                        "description": "user"
-                    }
-                }
-            }
-        },
-        "/api/v1/auth/logout": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Logout the authenticated user",
-                "operationId": "3a27a9e02ceb521eb3f98c8d2394aef9",
-                "responses": {
-                    "200": {
-                        "description": "Successfully logged out"
+                        "description": "Informations de l'utilisateur authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non autorisé (Jeton manquant ou invalide)"
                     }
                 },
                 "security": [
@@ -134,6 +171,127 @@
                         "passport": []
                     }
                 ]
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Déconnecte l'utilisateur",
+                "description": "Révoque le jeton d'accès (token) actuel de l'utilisateur, forçant la déconnexion.",
+                "operationId": "3a27a9e02ceb521eb3f98c8d2394aef9",
+                "responses": {
+                    "200": {
+                        "description": "Déconnexion réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non autorisé (Jeton manquant ou invalide)"
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AuthTokenResponse": {
+                "title": "Auth Token Response",
+                "description": "Réponse standard après connexion ou enregistrement",
+                "properties": {
+                    "token": {
+                        "description": "Jeton d'accès (Access Token) Passport",
+                        "type": "string"
+                    },
+                    "token_type": {
+                        "type": "string",
+                        "example": "Bearer"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/User"
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "title": "User Model",
+                "description": "Schéma de base de l'utilisateur",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Jean Dupont"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "jean.dupont@example.com"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationErrorResponse": {
+                "title": "Validation Error Response",
+                "description": "Réponse standard pour les erreurs de validation (code 422)",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "description": "Détails des erreurs de validation par champ",
+                        "properties": {
+                            "email": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "example": "The email has already been taken."
+                                }
+                            },
+                            "password": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "example": "The password must be at least 8 characters."
+                                }
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "passport": {
+                "type": "http",
+                "description": "Entrez votre jeton (token) Passport dans l'en-tête 'Authorization: Bearer [token]'",
+                "bearerFormat": "Passport Token",
+                "scheme": "bearer"
             }
         }
     },

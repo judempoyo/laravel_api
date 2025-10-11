@@ -16,13 +16,6 @@ use OpenApi\Annotations as OA;
  * @OA\Property(property="password", type="array", @OA\Items(type="string", example="The password must be at least 8 characters."))
  * ),
  * )
- * * @OA\SecurityScheme(
- * securityScheme="passport",
- * type="http",
- * scheme="bearer",
- * bearerFormat="Passport Token",
- * description="Entrez votre jeton (token) Passport dans l'en-tête 'Authorization: Bearer [token]'"
- * )
  */
 
 class ValidationErrorResponse {}

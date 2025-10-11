@@ -1,0 +1,309 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Documentation",
+        "description": "Documentation de l’API avec Swagger / OpenAPI",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000/api/v1/",
+            "description": "Serveur principal"
+        }
+    ],
+    "paths": {
+        "/api/v1/auth/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register a new user",
+                "operationId": "7ca6fc7989202054d29707fef91a2d4a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Log in a user and get a token",
+                "operationId": "9d0bb5c770cbec19b0b9566606ef4adb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful"
+                    },
+                    "422": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/user": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "get the authenticated user",
+                "operationId": "a4cddb112551ac7618446c14d9526d9c",
+                "responses": {
+                    "200": {
+                        "description": "user"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout the authenticated user",
+                "operationId": "3a27a9e02ceb521eb3f98c8d2394aef9",
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged out"
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "PatchContentFieldRequest": {
+                "required": [
+                    "path"
+                ],
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "example": "title"
+                    },
+                    "value": {
+                        "type": "string",
+                        "example": "Updated value",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "StoreContentRequest": {
+                "required": [
+                    "key",
+                    "data"
+                ],
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "maxLength": 191,
+                        "example": "homepage.title"
+                    },
+                    "data": {
+                        "type": "object",
+                        "example": {
+                            "title": "Welcome",
+                            "subtitle": "Hello world"
+                        }
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "block",
+                            "section",
+                            "free"
+                        ],
+                        "example": "block",
+                        "nullable": true
+                    },
+                    "locale": {
+                        "type": "string",
+                        "maxLength": 10,
+                        "example": "en",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "StoreProjectRequest": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "My Project"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "my-project",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Optional project description.",
+                        "nullable": true
+                    },
+                    "visibility": {
+                        "type": "string",
+                        "enum": [
+                            "private",
+                            "public"
+                        ],
+                        "example": "private",
+                        "nullable": true
+                    },
+                    "settings": {
+                        "type": "object",
+                        "example": {
+                            "color": "blue"
+                        },
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateContentRequest": {
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "type": "object",
+                        "example": {
+                            "title": "Updated title"
+                        }
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "block",
+                            "section",
+                            "free"
+                        ],
+                        "example": "section",
+                        "nullable": true
+                    },
+                    "locale": {
+                        "type": "string",
+                        "maxLength": 10,
+                        "example": "fr",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateProjectRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Updated Project"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "updated-project",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "New description.",
+                        "nullable": true
+                    },
+                    "visibility": {
+                        "type": "string",
+                        "enum": [
+                            "private",
+                            "public"
+                        ],
+                        "example": "public",
+                        "nullable": true
+                    },
+                    "settings": {
+                        "type": "object",
+                        "example": {
+                            "color": "green"
+                        },
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Auth"
+        }
+    ]
+}

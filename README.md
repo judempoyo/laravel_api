@@ -1,61 +1,159 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 Laravel API: Social Authentication with Passport
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A robust Laravel API backend focused on secure authentication using **Laravel Passport** for API token management and **Laravel Socialite** for seamless social login (Google). The API is documented using **L5-Swagger** for easy consumption by frontend or mobile clients.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🔗 Repository
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Source code: [https://github.com/judempoyo/laravel_api.git](https://github.com/judempoyo/laravel_api.git)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## ✨ Key Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Social Authentication:** Secure login/registration via Google (Socialite)
+- **API Token Management:** Token issuance and verification with Passport
+- **API Versioning:** All endpoints prefixed with `/api/v1`
+- **Comprehensive Documentation:** Live, interactive docs via L5-Swagger
+- **Modern Stack:** PHP ^8.2, supports SQLite, MySQL, etc.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## ⚙️ Getting Started
 
-## Laravel Sponsors
+### Prerequisites
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- PHP ≥8.2
+- Composer
+- Node.js & npm (optional, for asset compilation)
 
-### Premium Partners
+### Installation
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+1. **Clone the Repository:**
+    ```bash
+    git clone https://github.com/judempoyo/laravel_api.git
+    cd laravel_api
+    ```
 
-## Contributing
+2. **Install PHP Dependencies:**
+    ```bash
+    composer install
+    ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+3. **Setup Environment File:**
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
 
-## Code of Conduct
+4. **Database Configuration (Example: SQLite):**
+    ```bash
+    touch database/database.sqlite
+    # Edit .env and set:
+    # DB_CONNECTION=sqlite
+    ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+5. **Run Migrations:**
+    ```bash
+    php artisan migrate
+    ```
 
-## Security Vulnerabilities
+6. **Install & Configure Passport:**
+    ```bash
+    php artisan passport:install
+    ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+7. **Start the Local Server:**
+    ```bash
+    php artisan serve
+    ```
+    The API will run at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🔐 Google Socialite Configuration
+
+1. **Google Cloud Console:**
+    - Create a Web Application OAuth Client ID.
+    - Set the Authorized Redirect URI to:
+      ```
+      http://127.0.0.1:8000/api/v1/auth/socialite/google/callback
+      ```
+
+2. **Update `.env`:**
+    ```ini
+    # --- Google Socialite Credentials ---
+    GOOGLE_CLIENT_ID="YOUR_GOOGLE_CLIENT_ID"
+    GOOGLE_CLIENT_SECRET="YOUR_GOOGLE_CLIENT_SECRET"
+    GOOGLE_REDIRECT="http://127.0.0.1:8000/api/v1/auth/socialite/google/callback"
+    ```
+
+3. **Clear Configuration Cache:**
+    ```bash
+    php artisan config:clear
+    ```
+
+---
+
+## 📚 API Documentation (L5-Swagger)
+
+- Access the interactive docs at:  
+  [http://127.0.0.1:8000/api/documentation](http://127.0.0.1:8000/api/documentation)
+
+- **Regenerate docs after annotation changes:**
+    ```bash
+    php artisan l5-swagger:generate
+    ```
+
+- **Common Fix:**  
+  If you see `Route [login] not defined.`, edit `config/l5-swagger.php` and remove/comment the `'auth'` middleware:
+    ```php
+    // config/l5-swagger.php
+    'middleware' => [
+        'api' => [
+            // ... (other middlewares)
+            // 'auth',  // REMOVE OR COMMENT THIS OUT
+        ],
+    ],
+    ```
+
+---
+
+## 🔑 Key Endpoints
+
+| Method | Path                                               | Description                                         | Authentication |
+|--------|----------------------------------------------------|-----------------------------------------------------|----------------|
+| POST   | `/api/v1/auth/register`                            | Register a new user                                 | None           |
+| POST   | `/api/v1/auth/login`                               | Login with email/password and get a token           | None           |
+| GET    | `/api/v1/auth/socialite/{provider}`                | Start Socialite OAuth flow (e.g., `/google`)        | None           |
+| GET    | `/api/v1/auth/socialite/{provider}/callback`       | Handle OAuth callback, issue Passport token         | None           |
+| GET    | `/api/v1/auth/user`                                | Get details of authenticated user                   | Bearer Token   |
+| POST   | `/api/v1/auth/logout`                              | Revoke current access token                         | Bearer Token   |
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. **Fork:** [https://github.com/judempoyo/laravel_api.git](https://github.com/judempoyo/laravel_api.git)
+2. **Create branch:**  
+   `git checkout -b feature/AmazingFeature`
+3. **Commit:**  
+   `git commit -m 'feat: Add AmazingFeature'`
+4. **Push:**  
+   `git push origin feature/AmazingFeature`
+5. **Open a Pull Request** against the `main` branch.
+
+### Coding Standards
+
+- Follow [PSR-12](https://www.php-fig.org/psr/psr-12/) coding standard.
+- Cover all new features with Open API annotations in controllers.
+- Run tests before submitting:  
+  `php artisan test`
+
+---
+
+> Learn more about Google Socialite in Laravel:  
+> [Laravel Socialite Login with Google and Github](https://www.youtube.com/results?search_query=laravel+socialite+login+with+google+and+github)

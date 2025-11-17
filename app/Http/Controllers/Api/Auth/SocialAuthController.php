@@ -1,16 +1,23 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Auth;
+namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Responses\ApiResponse;
 use App\Models\SocialAccount;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
+/**
+ * @OA\Tag(
+ *     name="Auth Social",
+ *     description="Gestion de l'authentification sociale"
+ * )
+ */
 class SocialAuthController extends Controller
 {
 
@@ -76,18 +83,20 @@ class SocialAuthController extends Controller
         try {
             $socialiteUser = Socialite::driver($provider)->stateless()->user();
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to retrieve user from ' . $provider . ' provider.'], 401);
+             return ApiResponse::error('Fournisseur non supporté ou configuration incorrecte', null, 400);
         }
 
         $user = $this->findOrCreateUser($socialiteUser, $provider);
 
-        $token = $user->createToken('SocialAuthToken', ['api'])->accessToken;
+        $token = $user->createToken('SocialAuthToken', ['social'])->accessToken;
 
-        return response()->json([
+         return ApiResponse::success([
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user,
-        ], 200);
+        ], 'Authentification sociale réussie');
+
+      
     }
 
     protected function findOrCreateUser($socialiteUser, $provider): User

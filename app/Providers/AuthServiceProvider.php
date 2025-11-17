@@ -2,10 +2,6 @@
 
 namespace App\Providers;
 
-use App\Models\Project;
-use App\Models\Content;
-use App\Policies\ProjectPolicy;
-use App\Policies\ContentPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Laravel\Passport\Passport;
 
@@ -17,22 +13,26 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        Project::class => ProjectPolicy::class,
-        Content::class => ContentPolicy::class,
+       
     ];
 
 
     public function boot(): void
     {
         $this->registerPolicies();
+
+        Passport::tokensExpireIn(now()->addDays(15));
+        Passport::refreshTokensExpireIn(now()->addDays(30));
+        Passport::personalAccessTokensExpireIn(now()->addMonths(6));
+
         Passport::tokensCan([
-            'read-content' => 'Read project contents',
-            'write-content' => 'Create or update project contents',
+            'social' => 'Authentification via fournisseur OAuth (Google, GitHub...)',
+            'api' => 'Accès standard à l’API principale',
+            'read-only' => 'Accès en lecture seule',
         ]);
 
-
-        Passport::defaultScopes([
-            'read-content',
+        Passport::setDefaultScope([
+            'api',
         ]);
     }
 }

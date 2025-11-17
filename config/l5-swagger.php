@@ -38,7 +38,7 @@ return [
                 /*
                  * Set this to `json` or `yaml` to determine which documentation file to use in UI
                  */
-                'format_to_use_for_docs' => env('L5_FORMAT_TO_USE_FOR_DOCS', 'json'),
+                'format_to_use_for_docs' => env('L5_FORMAT_TO_USE_FOR_DOCS', 'yaml'),
 
                 /*
                  * Absolute paths to directory containing the swagger annotations are stored.
@@ -289,7 +289,7 @@ return [
                  * 'full' (expands the tags and operations),
                  * 'none' (expands nothing).
                  */
-                'doc_expansion' => env('L5_SWAGGER_UI_DOC_EXPANSION', 'none'),
+                'doc_expansion' => env('L5_SWAGGER_UI_DOC_EXPANSION', 'list'),
 
                 /**
                  * If set, enables filtering. The top bar will show an edit box that
@@ -299,7 +299,7 @@ return [
                  * is case-sensitive matching the filter expression anywhere inside
                  * the tag.
                  */
-                'filter' => env('L5_SWAGGER_UI_FILTERS', false), // true | false
+                'filter' => env('L5_SWAGGER_UI_FILTERS', true), // true | false
             ],
 
             'authorization' => [

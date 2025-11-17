@@ -20,7 +20,6 @@ use OpenApi\Annotations as OA;
  * @OA\Property(property="email_verified_at", type="string", format="date-time", nullable=true, description="Date de vérification de l'e-mail"),
  * @OA\Property(property="created_at", type="string", format="date-time", description="Date de création du compte"),
  * @OA\Property(property="updated_at", type="string", format="date-time", description="Date de dernière mise à jour du compte"),
- * @OA\Property(property="profile", ref="#/components/schemas/ProfileResource", nullable=true, description="Ressource du profil détaillé, si chargé"),
  *
  * )
  */

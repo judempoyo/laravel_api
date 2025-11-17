@@ -18,8 +18,8 @@
                     "Auth"
                 ],
                 "summary": "Enregistre un nouvel utilisateur",
-                "description": "Crée un nouvel utilisateur et lui émet un jeton (token) d'accès Passport.",
-                "operationId": "7ca6fc7989202054d29707fef91a2d4a",
+                "description": "Crée un nouvel utilisateur, lui envoie un email de vérification et émet un jeton (token) d'accès.",
+                "operationId": "5ffeaa26d701c3651dfc3a8479084184",
                 "requestBody": {
                     "description": "Données d'enregistrement de l'utilisateur",
                     "required": true,
@@ -35,12 +35,12 @@
                                 "properties": {
                                     "name": {
                                         "type": "string",
-                                        "example": "Jean Dupont"
+                                        "example": "Jude mpoyo"
                                     },
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "jean.dupont@example.com"
+                                        "example": "jude@gmail.com"
                                     },
                                     "password": {
                                         "type": "string",
@@ -62,7 +62,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Utilisateur enregistré et jeton d'accès émis.",
+                        "description": "Utilisateur enregistré. Un email de vérification a été envoyé.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -90,8 +90,8 @@
                     "Auth"
                 ],
                 "summary": "Connecte un utilisateur",
-                "description": "Authentifie un utilisateur avec son email et mot de passe, puis émet un jeton (token) d'accès Passport.",
-                "operationId": "9d0bb5c770cbec19b0b9566606ef4adb",
+                "description": "Authentifie un utilisateur avec son email et mot de passe, puis émet un jeton (token) d'accès Passport. L'email doit être vérifié.",
+                "operationId": "97d0fa1f733dead1980e640104204374",
                 "requestBody": {
                     "description": "Identifiants de connexion",
                     "required": true,
@@ -106,7 +106,7 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "jean.dupont@example.com"
+                                        "example": "jude@gmail.com"
                                     },
                                     "password": {
                                         "type": "string",
@@ -130,6 +130,9 @@
                             }
                         }
                     },
+                    "403": {
+                        "description": "L'email n'est pas vérifié."
+                    },
                     "422": {
                         "description": "Identifiants invalides.",
                         "content": {
@@ -143,27 +146,113 @@
                 }
             }
         },
+        "/api/v1/auth/email/verify/{id}/{hash}": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Vérifie l'adresse email de l'utilisateur",
+                "description": "Marque l'email de l'utilisateur authentifié comme vérifié.",
+                "operationId": "63e76b5a1bdccc66b10b7872932b33ec",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de l'utilisateur",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "hash",
+                        "in": "path",
+                        "description": "Hash de vérification",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Email vérifié avec succès."
+                    },
+                    "400": {
+                        "description": "Le lien de vérification est invalide ou l'email est déjà vérifié."
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/email/verification-notification": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Renvoyer l'email de vérification",
+                "description": "Envoie un nouvel email de vérification à l'utilisateur authentifié si son email n'est pas encore vérifié.",
+                "operationId": "4cf48dd7bc38caec41189f25c3f6e555",
+                "responses": {
+                    "200": {
+                        "description": "Email de vérification renvoyé."
+                    },
+                    "400": {
+                        "description": "L'email est déjà vérifié."
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
         "/api/v1/auth/user": {
             "get": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Récupère l'utilisateur authentifié",
-                "description": "Nécessite un jeton Passport valide dans l'en-tête Authorization.",
-                "operationId": "a4cddb112551ac7618446c14d9526d9c",
+                "operationId": "a23c8fc7323bb62036a82230dae1129d",
                 "responses": {
                     "200": {
-                        "description": "Informations de l'utilisateur authentifié",
+                        "description": "Utilisateur récupéré",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/User"
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Utilisateur authentifié"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/UserResource"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Non autorisé (Jeton manquant ou invalide)"
+                        "description": "Non autorisé"
                     }
                 },
                 "security": [
@@ -179,8 +268,7 @@
                     "Auth"
                 ],
                 "summary": "Déconnecte l'utilisateur",
-                "description": "Révoque le jeton d'accès (token) actuel de l'utilisateur, forçant la déconnexion.",
-                "operationId": "3a27a9e02ceb521eb3f98c8d2394aef9",
+                "operationId": "cf53777b1786575f52eb3cfd965c15a0",
                 "responses": {
                     "200": {
                         "description": "Déconnexion réussie",
@@ -188,9 +276,28 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
                                         "message": {
                                             "type": "string",
-                                            "example": "Logged out successfully"
+                                            "example": "Déconnexion réussie"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
                                         }
                                     },
                                     "type": "object"
@@ -199,7 +306,37 @@
                         }
                     },
                     "401": {
-                        "description": "Non autorisé (Jeton manquant ou invalide)"
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/refresh": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Rafraîchit le jeton d'accès",
+                "description": "Rafraîchit le jeton d'accès de l'utilisateur authentifié.",
+                "operationId": "18eda0c146bbb7b84dd85353173dd930",
+                "responses": {
+                    "200": {
+                        "description": "Jeton rafraîchi avec succès.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthTokenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non autorisé"
                     }
                 },
                 "security": [
@@ -216,7 +353,7 @@
                 ],
                 "summary": "Redirection vers le fournisseur social",
                 "description": "Lance le processus d'authentification en redirigeant l'utilisateur vers la page d'autorisation du fournisseur (Google, GitHub, etc.).",
-                "operationId": "f6240f81b2df2e9cef17bbb8ec1dd97b",
+                "operationId": "ca76cfc5363b89233f0e60b78889116f",
                 "parameters": [
                     {
                         "name": "provider",
@@ -245,7 +382,7 @@
                 ],
                 "summary": "Gestion du callback du fournisseur social",
                 "description": "Point de terminaison appelé par le fournisseur OAuth après l'autorisation de l'utilisateur. Crée/met à jour l'utilisateur et émet un jeton (token) Passport.",
-                "operationId": "b2da03bf7d17f7988d262b27c16b2125",
+                "operationId": "a8327172ec2a560014b66f52c91b49e8",
                 "parameters": [
                     {
                         "name": "provider",
@@ -277,42 +414,117 @@
     },
     "components": {
         "schemas": {
-            "AuthTokenResponse": {
-                "title": "Auth Token Response",
-                "description": "Réponse standard après connexion ou enregistrement",
+            "ApiResponse": {
                 "properties": {
-                    "token": {
-                        "description": "Jeton d'accès (Access Token) Passport",
-                        "type": "string"
+                    "success": {
+                        "type": "boolean",
+                        "example": true
                     },
-                    "token_type": {
+                    "message": {
                         "type": "string",
-                        "example": "Bearer"
+                        "example": "Opération réussie"
                     },
-                    "user": {
-                        "$ref": "#/components/schemas/User"
+                    "data": {
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "errors": {
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "meta": {
+                        "description": "Informations de pagination si disponible",
+                        "properties": {
+                            "current_page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "per_page": {
+                                "type": "integer",
+                                "example": 15
+                            },
+                            "total": {
+                                "type": "integer",
+                                "example": 150
+                            },
+                            "last_page": {
+                                "type": "integer",
+                                "example": 10
+                            }
+                        },
+                        "type": "object",
+                        "nullable": true
                     }
                 },
                 "type": "object"
             },
-            "User": {
-                "title": "User Model",
-                "description": "Schéma de base de l'utilisateur",
+            "AuthTokenResponse": {
+                "title": "Réponse API standard pour Auth",
+                "description": "Réponse standard après connexion ou enregistrement, avec structure ApiResponse",
+                "properties": {
+                    "success": {
+                        "description": "Indique si l'action a réussi",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "message": {
+                        "description": "Message lisible pour l'utilisateur",
+                        "type": "string",
+                        "example": "Connexion réussie"
+                    },
+                    "data": {
+                        "description": "Données principales de la réponse",
+                        "properties": {
+                            "token": {
+                                "description": "Jeton d'accès (Access Token) Passport",
+                                "type": "string"
+                            },
+                            "token_type": {
+                                "type": "string",
+                                "example": "Bearer"
+                            },
+                            "user": {
+                                "$ref": "#/components/schemas/UserResource"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "UserResource": {
+                "title": "Ressource Utilisateur",
+                "description": "Représentation d'un utilisateur, incluant potentiellement son profil.",
                 "properties": {
                     "id": {
+                        "description": "ID unique de l'utilisateur",
                         "type": "integer",
                         "example": 1
                     },
                     "name": {
+                        "description": "Nom complet de l'utilisateur",
                         "type": "string",
-                        "example": "Jean Dupont"
+                        "example": "Jude mpoyo"
                     },
                     "email": {
+                        "description": "Adresse e-mail",
                         "type": "string",
                         "format": "email",
-                        "example": "jean.dupont@example.com"
+                        "example": "jude@gmail.com"
+                    },
+                    "email_verified_at": {
+                        "description": "Date de vérification de l'e-mail",
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
                     },
                     "created_at": {
+                        "description": "Date de création du compte",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Date de dernière mise à jour du compte",
                         "type": "string",
                         "format": "date-time"
                     }
@@ -320,12 +532,18 @@
                 "type": "object"
             },
             "ValidationErrorResponse": {
-                "title": "Validation Error Response",
-                "description": "Réponse standard pour les erreurs de validation (code 422)",
+                "title": "Erreur de validation standard",
+                "description": "Réponse standard pour les erreurs de validation (code 422) avec structure ApiResponse",
                 "properties": {
+                    "success": {
+                        "description": "Indique que l'action a échoué",
+                        "type": "boolean",
+                        "example": false
+                    },
                     "message": {
+                        "description": "Message général décrivant l'erreur",
                         "type": "string",
-                        "example": "The given data was invalid."
+                        "example": "Les données fournies sont invalides."
                     },
                     "errors": {
                         "description": "Détails des erreurs de validation par champ",
@@ -334,14 +552,14 @@
                                 "type": "array",
                                 "items": {
                                     "type": "string",
-                                    "example": "The email has already been taken."
+                                    "example": "L'email est déjà utilisé."
                                 }
                             },
                             "password": {
                                 "type": "array",
                                 "items": {
                                     "type": "string",
-                                    "example": "The password must be at least 8 characters."
+                                    "example": "Le mot de passe doit contenir au moins 8 caractères."
                                 }
                             }
                         },
@@ -363,7 +581,7 @@
     "tags": [
         {
             "name": "Auth",
-            "description": "Auth"
+            "description": "Gestion de l'authentification et de la vérification d'email"
         },
         {
             "name": "Auth Socialite",

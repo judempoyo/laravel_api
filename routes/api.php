@@ -24,7 +24,7 @@ Route::prefix('v1')->group(function () {
         Route::middleware('throttle:10,1')->post('/register', [AuthController::class, 'register']);
         Route::middleware('throttle:5,1')->post('/login', [AuthController::class, 'login']);
 
-        Route::get('/auth/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+        Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
             ->middleware(['signed'])
             ->name('verification.verify');
 
@@ -36,7 +36,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::post('/refresh', [AuthController::class, 'refresh']);
             Route::get('/user', [AuthController::class, 'user']);
-            Route::post('/auth/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])
+            Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])
                 ->middleware(['throttle:6,1'])
                 ->name('verification.send');
         });

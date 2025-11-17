@@ -73,12 +73,11 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token', ['api'])->accessToken;
 
-        $userWithProfile = $user->loadMissing('profile');
 
         return ApiResponse::success([
             'token' => $token,
             'token_type' => 'Bearer',
-            'user' => UserResource::make($userWithProfile),
+            'user' => UserResource::make($user),
         ], 'Utilisateur enregistré avec succès. Veuillez consulter votre boîte mail pour vérifier votre compte.', 201);
     }
 
@@ -133,17 +132,21 @@ class AuthController extends Controller
             return ApiResponse::error('Identifiants incorrects', ['email' => ['Identifiants incorrects']], 422);
         }
 
+        $token = $user->createToken('auth_token', ['api'])->accessToken;
+
         if (! $user->hasVerifiedEmail()) {
-            return ApiResponse::error('Votre adresse email n\'est pas vérifiée.', null, 403);
+            ApiResponse::success([
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'user' => UserResource::make($user),
+        ], 'Connexion réussie - Votre adresse email n\'est pas vérifiée.');
         }
 
-        $token = $user->createToken('auth_token', ['api'])->accessToken;
-        $userWithProfile = $user->loadMissing('profile');
 
         return ApiResponse::success([
             'token' => $token,
             'token_type' => 'Bearer',
-            'user' => UserResource::make($userWithProfile),
+            'user' => UserResource::make($user),
         ], 'Connexion réussie');
     }
 
@@ -261,7 +264,7 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        $user = $request->user()->loadMissing('profile');
+        $user = $request->user;
 
         return ApiResponse::success(UserResource::make($user), 'Utilisateur authentifié');
     }
@@ -321,12 +324,10 @@ class AuthController extends Controller
         $user->token()->revoke();
         $newToken = $user->createToken('auth_token', ['api'])->accessToken;
 
-        $userWithProfile = $user->loadMissing('profile');
-
         return ApiResponse::success([
             'token' => $newToken,
             'token_type' => 'Bearer',
-            'user' => UserResource::make($userWithProfile),
+            'user' => UserResource::make($user),
         ], 'Jeton rafraîchi avec succès');
     }
 }

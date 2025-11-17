@@ -264,7 +264,7 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        $user = $request->user;
+        $user = $request->user();
 
         return ApiResponse::success(UserResource::make($user), 'Utilisateur authentifié');
     }

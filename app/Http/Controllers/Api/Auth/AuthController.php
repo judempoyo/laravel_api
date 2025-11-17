@@ -205,7 +205,8 @@ class AuthController extends Controller
             event(new Verified($user));
         }
 
-        return ApiResponse::success(null, 'Adresse email vérifiée avec succès.');
+        //return ApiResponse::success(null, 'Adresse email vérifiée avec succès.');
+        return redirect()->to(config('app.frontend_url') . '/email-verified');
     }
 
     /**

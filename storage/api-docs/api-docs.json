@@ -47,12 +47,6 @@
                                         "format": "password",
                                         "minLength": 8,
                                         "example": "secret123"
-                                    },
-                                    "password_confirmation": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "minLength": 8,
-                                        "example": "secret123"
                                     }
                                 },
                                 "type": "object"

@@ -16,7 +16,6 @@ class RegisterTest extends TestCase
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password',
-            'password_confirmation' => 'password',
         ];
 
         $response = $this->postJson('/api/v1/auth/register', $payload);

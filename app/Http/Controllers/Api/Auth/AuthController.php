@@ -36,7 +36,6 @@ class AuthController extends Controller
      * @OA\Property(property="name", type="string", example="Jude mpoyo"),
      * @OA\Property(property="email", type="string", format="email", example="jude@gmail.com"),
      * @OA\Property(property="password", type="string", format="password", minLength=8, example="secret123"),
-     * @OA\Property(property="password_confirmation", type="string", format="password", minLength=8, example="secret123")
      * )
      * ),
      *
@@ -135,7 +134,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token', ['api'])->accessToken;
 
         if (! $user->hasVerifiedEmail()) {
-            ApiResponse::success([
+            return ApiResponse::success([
             'token' => $token,
             'token_type' => 'Bearer',
             'user' => UserResource::make($user),
